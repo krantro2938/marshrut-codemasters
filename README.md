@@ -1,6 +1,6 @@
 # Маршрут — hackathon MVP
 
-An internal approval flow demo for the Fintech Academy **Эффективность 360** track. It uses a Go API, SQLite and a TanStack Start frontend. The demo data is fictional.
+An internal approval flow demo for the Fintech Academy **Эффективность 360** track. It uses a Go API, SQLite and a TanStack Start frontend with shadcn/ui components and Lucide icons. The demo data is fictional.
 
 Live demo: https://marshrut.aansl.com
 
