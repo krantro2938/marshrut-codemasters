@@ -2,6 +2,8 @@
 
 An internal approval flow demo for the Fintech Academy **Эффективность 360** track. It uses a Go API, SQLite and a TanStack Start frontend. The demo data is fictional.
 
+Live demo: https://marshrut.aansl.com
+
 ## What works
 
 - Four demo accounts with server-side sessions and role-checked actions.
@@ -39,4 +41,3 @@ Health endpoint: `/api/health`. The frontend forwards `/api/*` to the Go service
 ## Data and limits
 
 The database is initialized with three fictional requests and four fictional users. The shared demo password is for the prototype and should be distributed only to reviewers. Route templates and durations are placeholders for CustDev, not a representation of the university's current process. In a real pilot, replace shared demo accounts with individual identity, refine access rules, add audit retention and back up the SQLite volume.
-
