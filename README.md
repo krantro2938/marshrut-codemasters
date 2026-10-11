@@ -4,6 +4,8 @@ An internal approval flow demo for the Fintech Academy **Эффективнос�
 
 Live demo: https://marshrut.aansl.com
 
+Pitch deck: [PDF](presentation/Marshrut_Codemasters_pitch_MVP.pdf) · [PowerPoint](presentation/Marshrut_Codemasters_pitch_MVP.pptx)
+
 ## What works
 
 - Four demo accounts with server-side sessions and role-checked actions.
