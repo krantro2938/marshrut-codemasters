@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
-  ArrowRight, ArrowUpRight, Check, CheckCheck, ChevronRight, CircleHelp,
+  ArrowRight, ArrowUpRight, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
   Clock3, FileCheck2, FilePlus2, Files, Inbox, LayoutGrid, LogOut,
   Plus, Route as RouteIcon, ShieldCheck, Sparkles, X,
 } from 'lucide-react'
@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -60,6 +60,16 @@ function Status({ value }: { value: string }) {
   return <Badge variant="secondary" className={`status-badge status-${value}`}>
     <span className="status-dot"/>{statusText(value)}
   </Badge>
+}
+
+function ChoicePopover({ id, value, options, onValueChange }: { id: string; value: string; options: { value: string; label: string }[]; onValueChange: (value: string) => void }) {
+  const [open, setOpen] = useState(false)
+  return <Popover open={open} onOpenChange={setOpen}>
+    <PopoverTrigger asChild><Button id={id} type="button" variant="outline" className="choice-trigger"><span>{options.find(option => option.value === value)?.label}</span><ChevronDown size={15}/></Button></PopoverTrigger>
+    <PopoverContent align="start" className="choice-popover" role="menu" aria-label={id === 'demo-role' ? 'Роль' : 'Тип документа'}>
+      {options.map(option => <button type="button" role="menuitemradio" aria-checked={option.value === value} className="choice-option" key={option.value} onClick={() => { onValueChange(option.value); setOpen(false) }}><span>{option.label}</span>{option.value === value && <Check size={16}/>}</button>)}
+    </PopoverContent>
+  </Popover>
 }
 
 function Home() {
@@ -120,8 +130,10 @@ function Home() {
 function Login({ onLogin }: { onLogin: (u: User) => Promise<void> }) {
   const [email, setEmail] = useState(accounts[0].email)
   const [password, setPassword] = useState('')
+  const [demoPassword, setDemoPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  useEffect(() => { api<{ password: string }>('/demo-access').then(data => setDemoPassword(data.password)).catch(() => {}) }, [])
   async function submit(e: FormEvent) { e.preventDefault(); setBusy(true); setError(''); try { await onLogin(await api<User>('/login', 'POST', { email, password })) } catch (err) { setError((err as Error).message) } finally { setBusy(false) } }
   return <main className="landing"><div className="landing-frame">
     <header className="landing-nav"><Brand/><nav aria-label="Разделы сайта"><a href="#product">Продукт</a><a href="#workflow">Как работает</a><a href="#demo">Демо</a></nav><Button asChild variant="outline" className="nav-cta"><a href="#demo">Войти <ArrowUpRight size={16}/></a></Button></header>
@@ -133,7 +145,13 @@ function Login({ onLogin }: { onLogin: (u: User) => Promise<void> }) {
       <Card className="feature-card feature-lilac"><div className="feature-index">04 / КОНТРОЛЬ</div><div className="stat-figure">3<span>этапа</span></div><p>Руководитель → финансы → юрист</p></Card>
     </section>
     <section className="landing-workflow" id="workflow"><div><span className="kicker">СДЕЛАНО ДЛЯ РЕАЛЬНОЙ РАБОТЫ</span><h2>Не новый лабиринт.<br/>Просто ясный путь.</h2></div><div className="workflow-items"><div><FilePlus2 size={21}/><strong>Создайте заявку</strong><p>Тип документа задаёт маршрут согласования.</p></div><div><RouteIcon size={21}/><strong>Следите за шагами</strong><p>Видно, у кого заявка сейчас и когда истекает срок.</p></div><div><ShieldCheck size={21}/><strong>Примите решение</strong><p>Согласуйте или верните с понятной причиной.</p></div></div></section>
-    <section className="landing-access" id="demo"><div className="access-copy"><span className="kicker">ДЕМОНСТРАЦИЯ</span><h2>Зайдите и<br/>посмотрите сами.</h2><p>Выберите одну из четырёх ролей. Демо показывает весь маршрут на вымышленных данных.</p><div className="access-foot"><Sparkles size={17}/> Прототип команды Codemasters · 2026</div></div><Card className="access-card"><CardHeader><div className="access-card-icon"><ArrowUpRight size={20}/></div><CardTitle>Войти в демо</CardTitle><p>Для всех ролей используется один демонстрационный пароль.</p></CardHeader><CardContent><form onSubmit={submit}><div className="form-field"><Label htmlFor="demo-role">Роль</Label><Select value={email} onValueChange={setEmail}><SelectTrigger id="demo-role" className="w-full h-11"><SelectValue/></SelectTrigger><SelectContent>{accounts.map(a => <SelectItem key={a.email} value={a.email}>{a.name} · {a.role}</SelectItem>)}</SelectContent></Select></div><div className="form-field"><Label htmlFor="demo-password">Пароль</Label><Input id="demo-password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Пароль демонстрации" required/></div>{error && <p className="form-error" role="alert">{error}</p>}<Button className="access-submit" disabled={busy}>{busy ? 'Входим…' : <>Продолжить <ArrowRight size={17}/></>}</Button></form><p className="demo-disclaimer">Не добавляйте реальные документы или персональные данные.</p></CardContent></Card></section>
+    <section className="landing-access" id="demo">
+      <div className="access-copy"><span className="kicker">ДЕМОНСТРАЦИЯ</span><h2>Зайдите и<br/>посмотрите сами.</h2><p>Выберите одну из четырёх ролей. Демо показывает весь маршрут на вымышленных данных.</p><div className="access-foot"><Sparkles size={17}/> Прототип команды Codemasters · 2026</div></div>
+      <Card className="access-card"><CardHeader><div className="access-card-icon"><ArrowUpRight size={20}/></div><CardTitle>Войти в демо</CardTitle><p>Для всех ролей используется один демонстрационный пароль.</p></CardHeader><CardContent>
+        {demoPassword && <div className="demo-password"><div><span>ПАРОЛЬ ДЛЯ ДЕМО</span><strong>{demoPassword}</strong></div><Button type="button" variant="outline" size="sm" onClick={() => setPassword(demoPassword)}>Подставить</Button></div>}
+        <form onSubmit={submit}><div className="form-field"><Label htmlFor="demo-role">Роль</Label><ChoicePopover id="demo-role" value={email} onValueChange={setEmail} options={accounts.map(a => ({ value: a.email, label: `${a.name} · ${a.role}` }))}/></div><div className="form-field"><Label htmlFor="demo-password">Пароль</Label><Input id="demo-password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Пароль демонстрации" required/></div>{error && <p className="form-error" role="alert">{error}</p>}<Button className="access-submit" disabled={busy}>{busy ? 'Входим…' : <>Продолжить <ArrowRight size={17}/></>}</Button></form><p className="demo-disclaimer">Не добавляйте реальные документы или персональные данные.</p>
+      </CardContent></Card>
+    </section>
     <footer className="landing-footer"><Brand/><span>CODEMASTERS · ФИНТЕХ АКАДЕМИЯ 2026</span></footer>
   </div></main>
 }
@@ -156,7 +174,7 @@ function CreateModal({ open, busy, onClose, onCreate }: { open: boolean; busy: b
   const [title, setTitle] = useState('')
   const [type, setType] = useState('Закупка')
   const [description, setDescription] = useState('')
-  return <Dialog open={open} onOpenChange={next => { if (!next) onClose() }}><DialogContent className="create-dialog"><DialogHeader><div className="dialog-icon"><FilePlus2 size={20}/></div><DialogTitle>Новая заявка</DialogTitle><DialogDescription>Тип документа определит маршрут. Ответственные появятся автоматически.</DialogDescription></DialogHeader><form onSubmit={e => { e.preventDefault(); onCreate({ title, type, description }) }}><div className="form-field"><Label htmlFor="request-title">Название</Label><Input id="request-title" value={title} onChange={e => setTitle(e.target.value)} minLength={5} maxLength={120} placeholder="Например, закупка оборудования" required/></div><div className="form-field"><Label htmlFor="request-type">Тип документа</Label><Select value={type} onValueChange={setType}><SelectTrigger id="request-type" className="w-full h-10"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="Закупка">Закупка</SelectItem><SelectItem value="Договор">Договор</SelectItem><SelectItem value="Служебная записка">Служебная записка</SelectItem></SelectContent></Select></div><div className="form-field"><Label htmlFor="request-description">Краткое описание</Label><Textarea id="request-description" value={description} onChange={e => setDescription(e.target.value)} maxLength={2000} placeholder="Что нужно согласовать?"/></div><DialogFooter><Button type="button" variant="outline" onClick={onClose}>Отмена</Button><Button disabled={busy}>{busy ? 'Сохраняем…' : <>Создать заявку <ArrowRight size={16}/></>}</Button></DialogFooter></form></DialogContent></Dialog>
+  return <Dialog open={open} onOpenChange={next => { if (!next) onClose() }}><DialogContent className="create-dialog"><DialogHeader><div className="dialog-icon"><FilePlus2 size={20}/></div><DialogTitle>Новая заявка</DialogTitle><DialogDescription>Тип документа определит маршрут. Ответственные появятся автоматически.</DialogDescription></DialogHeader><form onSubmit={e => { e.preventDefault(); onCreate({ title, type, description }) }}><div className="form-field"><Label htmlFor="request-title">Название</Label><Input id="request-title" value={title} onChange={e => setTitle(e.target.value)} minLength={5} maxLength={120} placeholder="Например, закупка оборудования" required/></div><div className="form-field"><Label htmlFor="request-type">Тип документа</Label><ChoicePopover id="request-type" value={type} onValueChange={setType} options={['Закупка', 'Договор', 'Служебная записка'].map(value => ({ value, label: value }))}/></div><div className="form-field"><Label htmlFor="request-description">Краткое описание</Label><Textarea id="request-description" value={description} onChange={e => setDescription(e.target.value)} maxLength={2000} placeholder="Что нужно согласовать?"/></div><DialogFooter><Button type="button" variant="outline" onClick={onClose}>Отмена</Button><Button disabled={busy}>{busy ? 'Сохраняем…' : <>Создать заявку <ArrowRight size={16}/></>}</Button></DialogFooter></form></DialogContent></Dialog>
 }
 
 function Analytics({ metrics, items }: { metrics: Metrics | null; items: Item[] }) {

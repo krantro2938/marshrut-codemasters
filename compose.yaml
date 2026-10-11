@@ -21,7 +21,7 @@ services:
     restart: unless-stopped
     environment:
       API_URL: http://api:8080
-      PUBLIC_ORIGIN: https://marshrut.aansl.com
+      PUBLIC_ORIGINS: https://marshrut.aansl.com,https://marshrut-global.aansl.com
       PORT: "3000"
     depends_on:
       api:

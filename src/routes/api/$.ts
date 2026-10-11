@@ -2,8 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 
 async function proxy(request: Request) {
   const origin = request.headers.get('origin')
-  const allowedOrigin = process.env.PUBLIC_ORIGIN || new URL(request.url).origin
-  if (origin && origin !== allowedOrigin) return Response.json({ error: 'Недопустимый источник запроса' }, { status: 403 })
+  const allowedOrigins = (process.env.PUBLIC_ORIGINS || new URL(request.url).origin).split(',').map(value => value.trim())
+  if (origin && !allowedOrigins.includes(origin)) return Response.json({ error: 'Недопустимый источник запроса' }, { status: 403 })
   const upstream = process.env.API_URL || 'http://localhost:8080'
   const url = new URL(request.url)
   const headers = new Headers(request.headers)

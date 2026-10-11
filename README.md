@@ -2,7 +2,7 @@
 
 An internal approval flow demo for the Fintech Academy **Эффективность 360** track. It uses a Go API, SQLite and a TanStack Start frontend with shadcn/ui components and Lucide icons. The demo data is fictional.
 
-Live demo: https://marshrut.aansl.com
+Live demo: https://marshrut.aansl.com · Aeza origin: https://marshrut-global.aansl.com
 
 Pitch deck: [PDF](presentation/Marshrut_Codemasters_pitch_MVP.pdf) · [PowerPoint](presentation/Marshrut_Codemasters_pitch_MVP.pptx)
 
@@ -32,14 +32,14 @@ npm ci
 API_URL=http://localhost:8080 npm run dev
 ```
 
-The demo accounts are `initiator@marshrut.demo`, `manager@marshrut.demo`, `legal@marshrut.demo`, and `finance@marshrut.demo`. All use the `DEMO_PASSWORD` value set when the database is first created. Changing the environment variable later will not change existing account hashes; use a fresh demo database to reset them.
+The demo accounts are `initiator@marshrut.demo`, `manager@marshrut.demo`, `legal@marshrut.demo`, and `finance@marshrut.demo`. All use the `DEMO_PASSWORD` value set when the database is first created. The login page shows this password to make the public sandbox easy to try. The API refuses to start if the configured password no longer matches existing account hashes; use a fresh demo database to reset them.
 
 ## Docker deployment
 
 Create `.env` from `.env.example`, set a long random password and create the external `caddy-net` network if it does not exist. Run `docker compose up -d --build`. SQLite lives in the named `marshrut-data` volume. Put a reverse proxy in front of `marshrut-web:3000` on the `caddy-net` network; TLS should terminate there. The API is not published on a host port.
 
-Health endpoint: `/api/health`. The frontend forwards `/api/*` to the Go service and checks the request origin before forwarding writes.
+Health endpoint: `/api/health`. The frontend forwards `/api/*` to the Go service and checks the request origin before forwarding writes. `PUBLIC_ORIGINS` lists the Russian entry point and Aeza origin so either hostname can submit demo actions. Cloudflare points `marshrut-global.aansl.com` to Aeza and `marshrut.aansl.com` to the Russian VPS, whose Caddy proxy connects to Aeza over verified HTTPS.
 
 ## Data and limits
 
-The database is initialized with three fictional requests and four fictional users. The shared demo password is for the prototype and should be distributed only to reviewers. Route templates and durations are placeholders for CustDev, not a representation of the university's current process. In a real pilot, replace shared demo accounts with individual identity, refine access rules, add audit retention and back up the SQLite volume.
+The database is initialized with three fictional requests and four fictional users. The shared password is public and the sandbox is only for fictional data. Route templates and durations are placeholders for CustDev, not a representation of the university's current process. In a real pilot, replace shared demo accounts with individual identity, refine access rules, add audit retention and back up the SQLite volume.

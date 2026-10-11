@@ -20,7 +20,10 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-type app struct{ db *sql.DB }
+type app struct {
+	db           *sql.DB
+	demoPassword string
+}
 
 type User struct {
 	ID    int64  `json:"id"`
@@ -78,12 +81,15 @@ func main() {
 	if _, err := db.Exec("PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;"); err != nil {
 		log.Fatal(err)
 	}
-	a := &app{db: db}
+	a := &app{db: db, demoPassword: password}
 	if err := a.migrate(password); err != nil {
 		log.Fatal(err)
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) { jsonOut(w, 200, map[string]string{"status": "ok"}) })
+	mux.HandleFunc("GET /api/demo-access", func(w http.ResponseWriter, r *http.Request) {
+		jsonOut(w, 200, map[string]string{"password": a.demoPassword})
+	})
 	mux.HandleFunc("POST /api/login", a.login)
 	mux.HandleFunc("POST /api/logout", a.logout)
 	mux.HandleFunc("GET /api/me", a.me)
@@ -174,6 +180,13 @@ func (a *app) migrate(password string) error {
 		return err
 	}
 	if count > 0 {
+		var hash string
+		if err := a.db.QueryRow("SELECT password_hash FROM users LIMIT 1").Scan(&hash); err != nil {
+			return err
+		}
+		if bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) != nil {
+			return errors.New("DEMO_PASSWORD does not match existing demo accounts")
+		}
 		return nil
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)

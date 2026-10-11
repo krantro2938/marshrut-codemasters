@@ -76,7 +76,7 @@ h1,h2,h3 { letter-spacing: -.055em; }
 
 /* Public page */
 .landing { min-height: 100vh; padding: 28px; background: #c9cbc8; }
-.landing-frame { max-width: 1540px; margin: auto; padding: 0 clamp(26px, 5.2vw, 86px); background: #fff; box-shadow: 0 28px 90px #2224; }
+.landing-frame { max-width: 1540px; margin: auto; padding: 0 clamp(26px, 5.2vw, 86px); background: #fff; border-radius: 24px; box-shadow: 0 28px 90px #2224; }
 .landing-nav { height: 101px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .landing-nav nav { display: flex; align-items: center; gap: clamp(22px, 3.4vw, 52px); margin-left: 38px; }
 .landing-nav nav a { color: #4c4e4b; text-decoration: none; font-size: 12px; font-weight: 600; transition: color .2s; }
@@ -141,9 +141,20 @@ h1,h2,h3 { letter-spacing: -.055em; }
 .access-card [data-slot=card-header] p { margin: 3px 0 0; color: #818580; font-size: 11px; line-height: 1.5; }
 .form-field { display: grid; gap: 8px; margin-bottom: 18px; }
 .form-field [data-slot=label] { font-size: 11px; font-weight: 700; }
-.form-field input, .form-field [data-slot=select-trigger], .form-field textarea { border-radius: 9px; font-size: 12px; box-shadow: none; }
+.form-field input, .form-field textarea { border-radius: 9px; font-size: 12px; box-shadow: none; }
 .access-card .form-field input { height: 44px; }
-.access-card .form-field [data-slot=select-trigger] { height: 44px; }
+.choice-trigger { width: 100%; height: 44px; justify-content: space-between; padding: 0 12px; border-radius: 9px; color: #252726; background: #fff; font-size: 12px; font-weight: 400; box-shadow: none; }
+.choice-trigger>span { overflow: hidden; text-overflow: ellipsis; }
+.choice-trigger svg { color: #7d837e; }
+.choice-popover { width: var(--radix-popover-trigger-width); gap: 3px; padding: 5px; border: 1px solid #e4e7e2; border-radius: 12px; box-shadow: 0 16px 35px #1112; }
+.choice-option { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 38px; gap: 8px; padding: 8px 10px; border-radius: 8px; color: #292c29; text-align: left; font-size: 12px; cursor: pointer; }
+.choice-option:hover, .choice-option:focus-visible { background: #f0f2fa; outline: none; }
+.choice-option[aria-checked=true] { color: #354fd2; font-weight: 650; }
+.demo-password { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 19px; padding: 12px 13px; border: 1px solid #e1e5f6; border-radius: 11px; background: #f4f6ff; }
+.demo-password div { display: grid; gap: 3px; min-width: 0; }
+.demo-password span { color: #6877a5; font-size: 9px; font-weight: 750; letter-spacing: .12em; }
+.demo-password strong { overflow-wrap: anywhere; color: #253894; font-size: 12px; font-weight: 700; }
+.demo-password button { min-height: 29px; background: #fff; font-size: 11px; box-shadow: none; }
 .form-field input:focus, .form-field textarea:focus { border-color: #7f93e8; }
 .access-submit { display: flex; justify-content: space-between; width: 100%; height: 44px; margin-top: 4px; padding: 0 15px; border-radius: 9px; font-size: 12px; }
 .access-submit:hover { background: #3451d4; }
@@ -304,7 +315,7 @@ h1,h2,h3 { letter-spacing: -.055em; }
 }
 @media (max-width: 760px) {
   .landing { padding: 0; }
-  .landing-frame { padding: 0 22px; }
+  .landing-frame { padding: 0 22px; border-radius: 0; }
   .landing-nav { height: 76px; }
   .landing-nav nav { display: none; }
   .landing-hero { padding: 43px 0 39px; }
