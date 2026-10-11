@@ -1,0 +1,9 @@
+node_modules
+.output
+.tanstack
+.git
+.env
+backend/data
+*.db
+*.db-shm
+*.db-wal

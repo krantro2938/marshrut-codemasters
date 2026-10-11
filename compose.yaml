@@ -1,0 +1,36 @@
+services:
+  api:
+    build: ./backend
+    container_name: marshrut-api
+    restart: unless-stopped
+    environment:
+      DEMO_PASSWORD: ${DEMO_PASSWORD:?Set DEMO_PASSWORD in .env}
+      DATABASE_PATH: /data/marshrut.db
+      PORT: "8080"
+    volumes:
+      - marshrut-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/api/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+    networks: [default]
+  web:
+    build: .
+    container_name: marshrut-web
+    restart: unless-stopped
+    environment:
+      API_URL: http://api:8080
+      PUBLIC_ORIGIN: https://marshrut.aansl.com
+      PORT: "3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [default, caddy-net]
+
+volumes:
+  marshrut-data:
+
+networks:
+  caddy-net:
+    external: true
