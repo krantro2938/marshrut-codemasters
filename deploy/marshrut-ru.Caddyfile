@@ -1,0 +1,14 @@
+marshrut.aansl.com {
+    @foreign_origin {
+        header Origin *
+        not header Origin https://marshrut.aansl.com
+    }
+    respond @foreign_origin 403
+
+    reverse_proxy https://171.22.114.226 {
+        header_up Host marshrut-global.aansl.com
+        transport http {
+            tls_server_name marshrut-global.aansl.com
+        }
+    }
+}
