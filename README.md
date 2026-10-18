@@ -40,6 +40,8 @@ Create `.env` from `.env.example`, set a long random password and create the ext
 
 Health endpoint: `/api/health`. The frontend forwards `/api/*` to the Go service and checks the request origin before forwarding writes. `PUBLIC_ORIGINS` lists the Russian entry point and Aeza origin so either hostname can submit demo actions. Cloudflare points `marshrut-global.aansl.com` to Aeza and `marshrut.aansl.com` to the Russian VPS, whose Caddy proxy connects to Aeza over verified HTTPS.
 
+Keep the Aeza Caddy site block in [`deploy/marshrut-aeza.Caddyfile`](deploy/marshrut-aeza.Caddyfile) when editing its shared Caddyfile. The Russian proxy in [`deploy/marshrut-ru.Caddyfile`](deploy/marshrut-ru.Caddyfile) needs `marshrut-global.aansl.com` for the upstream TLS handshake. If that Aeza hostname disappears, the global URL returns a TLS error and the Russian entry point returns 502. When the live Caddyfile is bind mounted, verify what the container sees before reloading; replacing the host file can leave the running container reading its old inode.
+
 ## Data and limits
 
 The database is initialized with three fictional requests and four fictional users. The shared password is public and the sandbox is only for fictional data. Route templates and durations are placeholders for CustDev, not a representation of the university's current process. In a real pilot, replace shared demo accounts with individual identity, refine access rules, add audit retention and back up the SQLite volume.

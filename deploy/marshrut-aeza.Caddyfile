@@ -1,0 +1,6 @@
+# Keep both hostnames. The Russian entry proxy uses marshrut-global.aansl.com
+# as the HTTPS Host and SNI when it connects directly to Aeza's IP.
+marshrut.aansl.com, marshrut-global.aansl.com {
+    encode zstd gzip
+    reverse_proxy marshrut-web:3000
+}
