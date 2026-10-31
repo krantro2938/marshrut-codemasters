@@ -1,4 +1,4 @@
-# Маршрут — hackathon MVP
+# ТАКТ — hackathon MVP
 
 An internal approval flow demo for the Fintech Academy **Эффективность 360** track. It uses a Go API, SQLite and a TanStack Start frontend with shadcn/ui components and Lucide icons. The demo data is fictional.
 
@@ -13,6 +13,7 @@ Pitch deck: [PDF](presentation/Marshrut_Codemasters_pitch_MVP.pdf) · [PowerPoin
 - Create a request; approve or return it with a reason; revise and resubmit it.
 - Status, current owner, deadlines and decision history.
 - Manager view of flow counts, overdue stages and completion time.
+- A four-question anonymous demo survey, stored in a separate SQLite table. The manager view labels its response count as unverified demo data; it is not a CustDev result.
 
 The MVP deliberately does not upload document files or integrate with a university system. It must not be used for real personal or confidential data.
 
@@ -44,4 +45,4 @@ Keep the Aeza Caddy site block in [`deploy/marshrut-aeza.Caddyfile`](deploy/mars
 
 ## Data and limits
 
-The database is initialized with three fictional requests and four fictional users. The shared password is public and the sandbox is only for fictional data. Route templates and durations are placeholders for CustDev, not a representation of the university's current process. In a real pilot, replace shared demo accounts with individual identity, refine access rules, add audit retention and back up the SQLite volume.
+The database is initialized with three fictional requests and four fictional users. The shared password is public and the sandbox is only for fictional data. Route templates and durations are placeholders for CustDev, not a representation of the university's current process. The survey stores only four choice answers, with no names or contact details, and limits submissions to one per browser cookie. Open demo submissions still need sample verification before they can support research claims. In a real pilot, replace shared demo accounts with individual identity, refine access rules, add audit retention and back up the SQLite volume.

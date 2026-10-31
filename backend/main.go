@@ -99,6 +99,7 @@ func main() {
 	mux.HandleFunc("POST /api/requests/{id}/decision", a.decision)
 	mux.HandleFunc("POST /api/requests/{id}/resubmit", a.resubmit)
 	mux.HandleFunc("GET /api/metrics", a.metrics)
+	mux.HandleFunc("POST /api/survey", a.submitSurvey)
 	server := &http.Server{Addr: ":" + env("PORT", "8080"), Handler: security(mux), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 20 * time.Second, IdleTimeout: 60 * time.Second}
 	log.Printf("Marshrut API listening on %s", server.Addr)
 	log.Fatal(server.ListenAndServe())
@@ -167,6 +168,7 @@ func (a *app) migrate(password string) error {
 		`CREATE TABLE IF NOT EXISTS requests (id INTEGER PRIMARY KEY, title TEXT NOT NULL, type TEXT NOT NULL, description TEXT NOT NULL, creator_id INTEGER NOT NULL REFERENCES users(id), status TEXT NOT NULL, current_step INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, completed_at TEXT);`,
 		`CREATE TABLE IF NOT EXISTS steps (id INTEGER PRIMARY KEY, request_id INTEGER NOT NULL REFERENCES requests(id) ON DELETE CASCADE, position INTEGER NOT NULL, name TEXT NOT NULL, assignee_id INTEGER NOT NULL REFERENCES users(id), status TEXT NOT NULL, due_at TEXT NOT NULL, completed_at TEXT, note TEXT, UNIQUE(request_id,position));`,
 		`CREATE TABLE IF NOT EXISTS activities (id INTEGER PRIMARY KEY, request_id INTEGER NOT NULL REFERENCES requests(id) ON DELETE CASCADE, actor_id INTEGER NOT NULL REFERENCES users(id), action TEXT NOT NULL, note TEXT, created_at TEXT NOT NULL);`,
+		`CREATE TABLE IF NOT EXISTS survey_responses (id INTEGER PRIMARY KEY, role TEXT NOT NULL, frequency TEXT NOT NULL, channel TEXT NOT NULL, visibility INTEGER NOT NULL CHECK(visibility BETWEEN 1 AND 5), source TEXT NOT NULL DEFAULT 'public_demo', submission_token_hash TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL);`,
 		`CREATE INDEX IF NOT EXISTS idx_requests_creator ON requests(creator_id);`,
 		`CREATE INDEX IF NOT EXISTS idx_steps_assignee ON steps(assignee_id,status);`,
 	}
@@ -697,5 +699,65 @@ func (a *app) metrics(w http.ResponseWriter, r *http.Request) {
 	if avg.Valid {
 		mean = avg.Float64
 	}
-	jsonOut(w, 200, map[string]any{"total": total, "active": active, "approved": approved, "returned": returned, "overdueStages": overdue, "averageHours": fmt.Sprintf("%.1f", mean)})
+	var demoSurveyResponses int
+	_ = a.db.QueryRow("SELECT COUNT(*) FROM survey_responses WHERE source='public_demo'").Scan(&demoSurveyResponses)
+	jsonOut(w, 200, map[string]any{"total": total, "active": active, "approved": approved, "returned": returned, "overdueStages": overdue, "averageHours": fmt.Sprintf("%.1f", mean), "demoSurveyResponses": demoSurveyResponses})
+}
+
+func (a *app) submitSurvey(w http.ResponseWriter, r *http.Request) {
+	if c, err := r.Cookie("takt_survey"); err == nil {
+		h := sha256.Sum256([]byte(c.Value))
+		var exists int
+		if err := a.db.QueryRow("SELECT EXISTS(SELECT 1 FROM survey_responses WHERE submission_token_hash=?)", hex.EncodeToString(h[:])).Scan(&exists); err == nil && exists == 1 {
+			fail(w, 409, "Ответ из этого браузера уже сохранён")
+			return
+		}
+	}
+	var in struct {
+		Role       string `json:"role"`
+		Frequency  string `json:"frequency"`
+		Channel    string `json:"channel"`
+		Visibility int    `json:"visibility"`
+	}
+	if !decode(w, r, &in) {
+		return
+	}
+	allowed := func(value string, options ...string) bool {
+		for _, option := range options {
+			if value == option {
+				return true
+			}
+		}
+		return false
+	}
+	if !allowed(in.Role, "initiator", "approver", "both", "other") ||
+		!allowed(in.Frequency, "daily", "weekly", "monthly", "rarely") ||
+		!allowed(in.Channel, "email", "messenger", "paper", "system", "other") ||
+		in.Visibility < 1 || in.Visibility > 5 {
+		fail(w, 400, "Выберите ответы на все вопросы")
+		return
+	}
+	var count int
+	if err := a.db.QueryRow("SELECT COUNT(*) FROM survey_responses").Scan(&count); err != nil {
+		fail(w, 500, "Не удалось сохранить ответ")
+		return
+	}
+	if count >= 5000 {
+		fail(w, 503, "Приём ответов временно приостановлен")
+		return
+	}
+	var raw [32]byte
+	if _, err := rand.Read(raw[:]); err != nil {
+		fail(w, 500, "Не удалось сохранить ответ")
+		return
+	}
+	token := base64.RawURLEncoding.EncodeToString(raw[:])
+	h := sha256.Sum256([]byte(token))
+	if _, err := a.db.Exec("INSERT INTO survey_responses(role,frequency,channel,visibility,source,submission_token_hash,created_at) VALUES(?,?,?,?,?,?,?)", in.Role, in.Frequency, in.Channel, in.Visibility, "public_demo", hex.EncodeToString(h[:]), now()); err != nil {
+		fail(w, 500, "Не удалось сохранить ответ")
+		return
+	}
+	secure := r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https"
+	http.SetCookie(w, &http.Cookie{Name: "takt_survey", Value: token, Path: "/", HttpOnly: true, Secure: secure, SameSite: http.SameSiteLaxMode, MaxAge: 180 * 24 * 3600})
+	jsonOut(w, 201, map[string]bool{"ok": true})
 }

@@ -129,6 +129,31 @@ h1,h2,h3 { letter-spacing: -.055em; }
 .workflow-items strong { display: block; margin-top: 23px; font-size: 14px; letter-spacing: -.02em; }
 .workflow-items p { max-width: 180px; margin: 9px 0 0; color: #777b76; font-size: 11px; line-height: 1.55; }
 .landing-access { display: grid; grid-template-columns: 1fr 400px; align-items: center; gap: 12%; margin-bottom: 40px; padding: clamp(34px, 6vw, 75px); background: #f4f4f1; border-radius: 27px; scroll-margin-top: 24px; }
+.survey-section { display: grid; grid-template-columns: minmax(0, .9fr) minmax(360px, 1fr); gap: clamp(48px, 8vw, 130px); align-items: start; padding: 76px 0 86px; border-top: 1px solid #e6e7e4; scroll-margin-top: 24px; }
+.survey-intro h2 { max-width: 580px; margin: 18px 0 18px; font-size: clamp(38px, 4.1vw, 63px); line-height: 1.05; }
+.survey-intro>p { max-width: 490px; color: #626862; font-size: 14px; line-height: 1.7; }
+.survey-example { display: grid; gap: 7px; max-width: 440px; margin-top: 38px; padding-left: 17px; border-left: 3px solid #3854d7; }
+.survey-example strong { color: #3650d0; font-size: 11px; }
+.survey-example span { color: #878d86; font-size: 11px; line-height: 1.6; }
+.survey-form { display: grid; gap: 17px; padding: 27px 30px 29px; border: 1px solid #e5e7e2; border-radius: 19px; background: #fff; box-shadow: 0 20px 55px #1725150a; }
+.survey-form>label { display: grid; gap: 8px; color: #323633; font-size: 12px; font-weight: 650; }
+.survey-form select { width: 100%; height: 44px; padding: 0 13px; border: 1px solid #dfe3dd; border-radius: 9px; background: #fafbf9; color: #343834; font: inherit; font-size: 12px; font-weight: 450; }
+.survey-form select:focus-visible { outline: 2px solid #8ca0ea; outline-offset: 2px; }
+.survey-form fieldset { min-width: 0; margin: 4px 0 0; padding: 0; border: 0; }
+.survey-form legend { margin-bottom: 11px; color: #323633; font-size: 12px; font-weight: 650; }
+.survey-scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.survey-scale label { cursor: pointer; }
+.survey-scale input { position: absolute; opacity: 0; }
+.survey-scale label span { display: grid; place-items: center; height: 43px; border: 1px solid #dfe3dd; border-radius: 9px; background: #fafbf9; color: #676e67; font-size: 13px; font-weight: 700; transition: background .15s, color .15s, border-color .15s; }
+.survey-scale input:checked+span { border-color: #3652d7; background: #3652d7; color: #fff; }
+.survey-scale input:focus-visible+span { outline: 2px solid #8ca0ea; outline-offset: 2px; }
+.survey-scale-hints { display: flex; justify-content: space-between; margin-top: 8px; color: #969c95; font-size: 10px; }
+.survey-submit { width: 100%; height: 45px; justify-content: space-between; margin-top: 3px; padding: 0 15px; border-radius: 9px; font-size: 12px; }
+.survey-error { margin: -4px 0 0; color: #b14134; font-size: 11px; }
+.survey-success { align-self: center; padding: 40px 12px; color: #3753d7; text-align: center; }
+.survey-success svg { margin: 0 auto 17px; }
+.survey-success h3 { color: #202421; font-size: 25px; }
+.survey-success p { max-width: 350px; margin: 0 auto; color: #798078; font-size: 12px; line-height: 1.65; }
 .access-copy h2 { margin: 20px 0 18px; font-size: clamp(45px, 4.5vw, 68px); line-height: 1.02; }
 .access-copy>p { max-width: 400px; color: #676c66; font-size: 14px; line-height: 1.7; }
 .access-foot { display: flex; align-items: center; gap: 10px; margin-top: 60px; color: #8b8f89; font-size: 11px; }
@@ -305,9 +330,11 @@ h1,h2,h3 { letter-spacing: -.055em; }
 .active-row span { color: #a0a59f; font-size: 10px; }
 .active-row [data-slot=badge] { color: #777e77; font-size: 9px; white-space: nowrap; }
 .no-active { color: #a0a59f; font-size: 11px; }
+.analytics-page .survey-metric { margin-top: 10px; color: #5367bb; }
 
 @media (max-width: 1050px) {
   .landing-workflow { grid-template-columns: 1fr; gap: 40px; }
+  .survey-section { grid-template-columns: 1fr; gap: 35px; }
   .landing-access { gap: 6%; }
   .app-shell { grid-template-columns: 210px minmax(0,1fr); }
   .work-grid { grid-template-columns: minmax(250px,.85fr) minmax(350px,1.15fr); }
@@ -330,6 +357,8 @@ h1,h2,h3 { letter-spacing: -.055em; }
   .request-preview strong { font-size: 15px; margin: 18px 0 12px; }
   .preview-person { font-size: 9px; }
   .landing-workflow { padding: 55px 0; }
+  .survey-section { padding: 56px 0 66px; }
+  .survey-form { padding: 22px; }
   .workflow-items { gap: 10px; }
   .landing-access { grid-template-columns: 1fr; gap: 35px; margin: 0 0 20px; padding: 30px 22px; }
   .access-foot { margin-top: 23px; }

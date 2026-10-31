@@ -23,7 +23,7 @@ type User = { id: number; name: string; email: string; role: string }
 type Step = { id: number; position: number; name: string; assignee: User; status: string; dueAt: string; completedAt?: string; note?: string }
 type Activity = { id: number; actor: string; action: string; note?: string; createdAt: string }
 type Item = { id: number; title: string; type: string; description: string; creator: User; status: string; currentStep: number; createdAt: string; updatedAt: string; completedAt?: string; steps: Step[]; activity: Activity[] }
-type Metrics = { total: number; active: number; approved: number; returned: number; overdueStages: number; averageHours: string }
+type Metrics = { total: number; active: number; approved: number; returned: number; overdueStages: number; averageHours: string; demoSurveyResponses: number }
 type View = 'inbox' | 'all' | 'analytics'
 
 const accounts = [
@@ -136,7 +136,7 @@ function Login({ onLogin }: { onLogin: (u: User) => Promise<void> }) {
   useEffect(() => { api<{ password: string }>('/demo-access').then(data => setDemoPassword(data.password)).catch(() => {}) }, [])
   async function submit(e: FormEvent) { e.preventDefault(); setBusy(true); setError(''); try { await onLogin(await api<User>('/login', 'POST', { email, password })) } catch (err) { setError((err as Error).message) } finally { setBusy(false) } }
   return <main className="landing"><div className="landing-frame">
-    <header className="landing-nav"><Brand/><nav aria-label="Разделы сайта"><a href="#product">Продукт</a><a href="#workflow">Как работает</a><a href="#demo">Демо</a></nav><Button asChild variant="outline" className="nav-cta"><a href="#demo">Войти <ArrowUpRight size={16}/></a></Button></header>
+    <header className="landing-nav"><Brand/><nav aria-label="Разделы сайта"><a href="#product">Продукт</a><a href="#workflow">Как работает</a><a href="#survey">Анкета</a><a href="#demo">Демо</a></nav><Button asChild variant="outline" className="nav-cta"><a href="#demo">Войти <ArrowUpRight size={16}/></a></Button></header>
     <section className="landing-hero"><div className="hero-tag"><span/> CODEMASTERS / ЭФФЕКТИВНОСТЬ 360</div><h1>Согласование,<br/><em>которое видно.</em></h1><p>Заявка больше не теряется между отделами. В одном месте — следующий шаг, ответственный, срок и история решений.</p><Button asChild className="hero-cta"><a href="#demo">Открыть демо <ArrowRight size={18}/></a></Button><span className="hero-note">Показательный сценарий: закупка оборудования для учебного подразделения.</span></section>
     <section className="feature-gallery" id="product" aria-label="Возможности продукта">
       <Card className="feature-card feature-request"><div className="feature-index">01 / ЗАЯВКА</div><div className="request-preview"><div className="preview-caption"><span>№ 0042</span><span className="preview-status"><i/> В работе</span></div><strong>Закупка оборудования</strong><div className="preview-person"><Avatar className="size-7"><AvatarFallback>МО</AvatarFallback></Avatar><span>Сейчас у Максима Орлова</span></div><div className="preview-line"><i/><i/><i/></div></div></Card>
@@ -145,6 +145,7 @@ function Login({ onLogin }: { onLogin: (u: User) => Promise<void> }) {
       <Card className="feature-card feature-lilac"><div className="feature-index">04 / КОНТРОЛЬ</div><div className="stat-figure">3<span>этапа</span></div><p>Руководитель → финансы → юрист</p></Card>
     </section>
     <section className="landing-workflow" id="workflow"><div><span className="kicker">СДЕЛАНО ДЛЯ РЕАЛЬНОЙ РАБОТЫ</span><h2>Не новый лабиринт.<br/>Просто ясный путь.</h2></div><div className="workflow-items"><div><FilePlus2 size={21}/><strong>Создайте заявку</strong><p>Тип документа задаёт маршрут согласования.</p></div><div><RouteIcon size={21}/><strong>Следите за шагами</strong><p>Видно, у кого заявка сейчас и когда истекает срок.</p></div><div><ShieldCheck size={21}/><strong>Примите решение</strong><p>Согласуйте или запросите уточнение.</p></div></div></section>
+    <Survey/>
     <section className="landing-access" id="demo">
       <div className="access-copy"><span className="kicker">ДЕМОНСТРАЦИЯ</span><h2>Зайдите и<br/>посмотрите сами.</h2><p>Выберите одну из четырёх ролей. Создайте заявку типа «Закупка» и пройдите согласование. Все данные вымышлены; маршрут иллюстрирует гипотезу, а не процесс университета.</p><div className="access-foot"><Sparkles size={17}/> Прототип команды Codemasters · 2026</div></div>
       <Card className="access-card"><CardHeader><div className="access-card-icon"><ArrowUpRight size={20}/></div><CardTitle>Войти в демо</CardTitle><p>Для всех ролей используется один демонстрационный пароль.</p></CardHeader><CardContent>
@@ -154,6 +155,36 @@ function Login({ onLogin }: { onLogin: (u: User) => Promise<void> }) {
     </section>
     <footer className="landing-footer"><Brand/><span>CODEMASTERS · ФИНТЕХ АКАДЕМИЯ 2026</span></footer>
   </div></main>
+}
+
+function Survey() {
+  const [role, setRole] = useState('')
+  const [frequency, setFrequency] = useState('')
+  const [channel, setChannel] = useState('')
+  const [visibility, setVisibility] = useState(0)
+  const [busy, setBusy] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
+  async function submit(e: FormEvent) {
+    e.preventDefault()
+    if (!visibility) { setError('Оцените, насколько понятен статус заявки.'); return }
+    setBusy(true); setError('')
+    try { await api('/survey', 'POST', { role, frequency, channel, visibility }); setSent(true) }
+    catch (err) { setError((err as Error).message) }
+    finally { setBusy(false) }
+  }
+  return <section className="survey-section" id="survey" aria-labelledby="survey-title">
+    <div className="survey-intro"><span className="kicker">ПРОВЕРКА ГИПОТЕЗЫ</span><h2 id="survey-title">Как сейчас проходят согласования?</h2><p>Четыре вопроса о вашем опыте. Мы не просим имя, контакты или сведения о конкретной организации.</p><div className="survey-example"><strong>Демонстрационная анкета</strong><span>Ответы сохраняются в SQLite как данные демо. Они не включаются в отчёт CustDev без проверки выборки.</span></div></div>
+    <form className="survey-form" onSubmit={submit}>
+      {sent ? <div className="survey-success" role="status"><CheckCheck size={30}/><h3>Ответ сохранён</h3><p>Спасибо. Результаты этой открытой демо-формы пока не считаются исследованием пользователей.</p></div> : <>
+        <label>Ваша роль в согласованиях<select required value={role} onChange={e => setRole(e.target.value)}><option value="">Выберите вариант</option><option value="initiator">Подаю заявки</option><option value="approver">Согласую заявки</option><option value="both">И подаю, и согласую</option><option value="other">Другая роль</option></select></label>
+        <label>Как часто вы участвуете в согласованиях?<select required value={frequency} onChange={e => setFrequency(e.target.value)}><option value="">Выберите вариант</option><option value="daily">Почти каждый день</option><option value="weekly">Каждую неделю</option><option value="monthly">Примерно раз в месяц</option><option value="rarely">Реже</option></select></label>
+        <label>Где чаще всего узнаёте статус?<select required value={channel} onChange={e => setChannel(e.target.value)}><option value="">Выберите вариант</option><option value="email">Почта</option><option value="messenger">Чат или звонок</option><option value="paper">Бумажный документ</option><option value="system">Внутренняя система</option><option value="other">Другой способ</option></select></label>
+        <fieldset><legend>Насколько понятен текущий статус заявки?</legend><div className="survey-scale" role="radiogroup" aria-label="Понятность статуса от 1 до 5">{[1,2,3,4,5].map(n => <label key={n}><input type="radio" name="visibility" value={n} checked={visibility === n} onChange={() => setVisibility(n)}/><span>{n}</span></label>)}</div><div className="survey-scale-hints"><span>Совсем не понятен</span><span>Полностью понятен</span></div></fieldset>
+        {error && <p className="survey-error" role="alert">{error}</p>}<Button disabled={busy} className="survey-submit">{busy ? 'Сохраняем…' : <>Отправить ответ <ArrowRight size={17}/></>}</Button>
+      </>}
+    </form>
+  </section>
 }
 
 function Detail({ item, me, busy, onDecision, onResubmit }: { item: Item; me: User; busy: boolean; onDecision: (d: string, n: string) => void; onResubmit: (d: string) => void }) {
@@ -180,5 +211,5 @@ function CreateModal({ open, busy, onClose, onCreate }: { open: boolean; busy: b
 function Analytics({ metrics, items }: { metrics: Metrics | null; items: Item[] }) {
   const active = items.filter(x => x.status === 'in_progress')
   const cards = [{ label: 'Всего заявок', value: metrics?.total, Icon: Files }, { label: 'В работе', value: metrics?.active, Icon: Clock3 }, { label: 'Согласовано', value: metrics?.approved, Icon: CheckCheck }, { label: 'Просроченных этапов', value: metrics?.overdueStages, Icon: ShieldCheck }]
-  return <div className="analytics-page"><div className="app-page-head"><div><span className="kicker">РАБОЧИЙ СТОЛ / 03</span><h1>Пульс процесса</h1><p>Сводка по демонстрационным заявкам. В пилоте сравним те же показатели с исходной базой.</p></div></div><div className="analytics-cards">{cards.map(({ label, value, Icon }) => <Card key={label} className="metric-card"><CardContent><div><span>{label}</span><Icon size={19}/></div><strong>{String(value ?? '—').padStart(2, '0')}</strong></CardContent></Card>)}</div><div className="analytics-bottom"><Card className="average-card"><CardContent><span className="kicker">СРЕДНЕЕ ВРЕМЯ СОГЛАСОВАНИЯ</span><div><strong>{metrics?.averageHours ?? '—'}</strong><span>часа</span></div><p>По завершённым демо заявкам. Фактический эффект можно измерить только во время пилота.</p></CardContent></Card><Card className="active-card"><CardHeader><span className="kicker">ТЕКУЩИЙ ПОТОК</span><CardTitle>Сейчас в работе</CardTitle></CardHeader><CardContent>{active.length ? active.map(x => <div key={x.id} className="active-row"><div><strong>{x.title}</strong><span>{x.steps[x.currentStep]?.name} · {x.steps[x.currentStep]?.assignee.name}</span></div><Badge variant="outline">{fmt(x.steps[x.currentStep]?.dueAt)}</Badge></div>) : <p className="no-active">Активных заявок нет.</p>}</CardContent></Card></div></div>
+  return <div className="analytics-page"><div className="app-page-head"><div><span className="kicker">РАБОЧИЙ СТОЛ / 03</span><h1>Пульс процесса</h1><p>Сводка по демонстрационным заявкам. В пилоте сравним те же показатели с исходной базой.</p><p className="survey-metric">Ответы через открытую демо-анкету: {metrics?.demoSurveyResponses ?? '—'}. Выборка не проверена и не включена в CustDev.</p></div></div><div className="analytics-cards">{cards.map(({ label, value, Icon }) => <Card key={label} className="metric-card"><CardContent><div><span>{label}</span><Icon size={19}/></div><strong>{String(value ?? '—').padStart(2, '0')}</strong></CardContent></Card>)}</div><div className="analytics-bottom"><Card className="average-card"><CardContent><span className="kicker">СРЕДНЕЕ ВРЕМЯ СОГЛАСОВАНИЯ</span><div><strong>{metrics?.averageHours ?? '—'}</strong><span>часа</span></div><p>По завершённым демо заявкам. Фактический эффект можно измерить только во время пилота.</p></CardContent></Card><Card className="active-card"><CardHeader><span className="kicker">ТЕКУЩИЙ ПОТОК</span><CardTitle>Сейчас в работе</CardTitle></CardHeader><CardContent>{active.length ? active.map(x => <div key={x.id} className="active-row"><div><strong>{x.title}</strong><span>{x.steps[x.currentStep]?.name} · {x.steps[x.currentStep]?.assignee.name}</span></div><Badge variant="outline">{fmt(x.steps[x.currentStep]?.dueAt)}</Badge></div>) : <p className="no-active">Активных заявок нет.</p>}</CardContent></Card></div></div>
 }
