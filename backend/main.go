@@ -664,13 +664,10 @@ func (a *app) resubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	t := now()
-	_, err = tx.Exec("UPDATE requests SET description=?,status='in_progress',current_step=0,updated_at=? WHERE id=?", in.Description, t, id)
-	if err == nil {
-		_, err = tx.Exec("UPDATE steps SET status='pending',completed_at=NULL,note=NULL WHERE request_id=?", id)
-	}
+	_, err = tx.Exec("UPDATE requests SET description=?,status='in_progress',updated_at=? WHERE id=?", in.Description, t, id)
 	if err == nil {
 		due := time.Now().UTC().Add(48 * time.Hour).Format(time.RFC3339)
-		_, err = tx.Exec("UPDATE steps SET status='active',due_at=? WHERE request_id=? AND position=0", due, id)
+		_, err = tx.Exec("UPDATE steps SET status='active',completed_at=NULL,due_at=? WHERE request_id=? AND position=(SELECT current_step FROM requests WHERE id=?) AND status='returned'", due, id, id)
 	}
 	if err == nil {
 		_, err = tx.Exec("INSERT INTO activities(request_id,actor_id,action,created_at) VALUES(?,?,?,?)", id, u.ID, "resubmitted", t)
