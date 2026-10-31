@@ -673,3 +673,8 @@ h1,h2,h3 { font-family: "Unbounded Variable", sans-serif; letter-spacing: -.055e
 @media (prefers-reduced-motion: reduce) {
   *, *:before, *:after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+@media (max-width: 1230px) {
+  .work-grid { grid-template-columns: minmax(0, 1fr); }
+  .request-list-card, .detail-card { min-height: 0; }
+}
