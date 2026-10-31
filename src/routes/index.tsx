@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
-  ArrowRight, ArrowUpRight, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
+  ArrowRight, ArrowUpRight, Check, CheckCheck, ChevronRight, CircleHelp,
   Clock3, FileCheck2, FilePlus2, Files, Inbox, LayoutGrid, LogOut,
   Plus, Route as RouteIcon, ShieldCheck, Sparkles, X,
 } from 'lucide-react'
@@ -13,7 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -63,13 +64,10 @@ function Status({ value }: { value: string }) {
 }
 
 function ChoicePopover({ id, value, options, onValueChange }: { id: string; value: string; options: { value: string; label: string }[]; onValueChange: (value: string) => void }) {
-  const [open, setOpen] = useState(false)
-  return <Popover open={open} onOpenChange={setOpen}>
-    <PopoverTrigger asChild><Button id={id} type="button" variant="outline" className="choice-trigger"><span>{options.find(option => option.value === value)?.label}</span><ChevronDown size={15}/></Button></PopoverTrigger>
-    <PopoverContent align="start" className="choice-popover" role="menu" aria-label={id === 'demo-role' ? 'Роль' : 'Тип документа'}>
-      {options.map(option => <button type="button" role="menuitemradio" aria-checked={option.value === value} className="choice-option" key={option.value} onClick={() => { onValueChange(option.value); setOpen(false) }}><span>{option.label}</span>{option.value === value && <Check size={16}/>}</button>)}
-    </PopoverContent>
-  </Popover>
+  return <Select value={value} onValueChange={onValueChange}>
+    <SelectTrigger id={id} className="choice-trigger"><SelectValue /></SelectTrigger>
+    <SelectContent position="popper" className="choice-popover">{options.map(option => <SelectItem className="choice-option" value={option.value} key={option.value}>{option.label}</SelectItem>)}</SelectContent>
+  </Select>
 }
 
 function Home() {
@@ -137,7 +135,7 @@ function Login({ onLogin }: { onLogin: (u: User) => Promise<void> }) {
   async function submit(e: FormEvent) { e.preventDefault(); setBusy(true); setError(''); try { await onLogin(await api<User>('/login', 'POST', { email, password })) } catch (err) { setError((err as Error).message) } finally { setBusy(false) } }
   return <main className="landing"><div className="landing-frame">
     <header className="landing-nav"><Brand/><nav aria-label="Разделы сайта"><a href="#product">Продукт</a><a href="#workflow">Как работает</a><a href="#survey">Анкета</a><a href="#demo">Демо</a></nav><Button asChild variant="outline" className="nav-cta"><a href="#demo">Войти <ArrowUpRight size={16}/></a></Button></header>
-    <section className="landing-hero"><div className="hero-tag"><span/> CODEMASTERS / ЭФФЕКТИВНОСТЬ 360</div><h1>Согласование,<br/><em>которое видно.</em></h1><p>Заявка больше не теряется между отделами. В одном месте — следующий шаг, ответственный, срок и история решений.</p><Button asChild className="hero-cta"><a href="#demo">Открыть демо <ArrowRight size={18}/></a></Button><span className="hero-note">Показательный сценарий: закупка оборудования для учебного подразделения.</span></section>
+    <section className="landing-hero"><div className="hero-copy"><div className="hero-tag"><span/> CODEMASTERS / ЭФФЕКТИВНОСТЬ 360</div><h1>Согласование,<br/><em>которое видно.</em></h1><p>Заявка больше не теряется между отделами. В одном месте — следующий шаг, ответственный, срок и история решений.</p><div className="hero-actions"><Button asChild className="hero-cta"><a href="#demo">Открыть демо <ArrowRight size={18}/></a></Button><a className="hero-text-link" href="#workflow">Как это работает <ArrowUpRight size={16}/></a></div><span className="hero-note">Показательный сценарий: закупка оборудования для учебного подразделения.</span></div><div className="hero-art" aria-hidden="true"><div className="hero-art-top"><span>МАРШРУТ / 0042</span><span>•••</span></div><div className="hero-art-title">Закупка<br/>оборудования</div><div className="hero-art-progress"><span>01</span><i/><span>02</span><i/><span>03</span></div><div className="hero-art-status"><div><span>СЕЙЧАС НА ЭТАПЕ</span><strong>Финансы</strong><small>Ирина Соколова</small></div><span className="hero-art-pulse"/></div><div className="hero-art-foot">Каждое решение остаётся в истории <ArrowUpRight size={16}/></div></div></section>
     <section className="feature-gallery" id="product" aria-label="Возможности продукта">
       <Card className="feature-card feature-request"><div className="feature-index">01 / ЗАЯВКА</div><div className="request-preview"><div className="preview-caption"><span>№ 0042</span><span className="preview-status"><i/> В работе</span></div><strong>Закупка оборудования</strong><div className="preview-person"><Avatar className="size-7"><AvatarFallback>МО</AvatarFallback></Avatar><span>Сейчас у Максима Орлова</span></div><div className="preview-line"><i/><i/><i/></div></div></Card>
       <Card className="feature-card feature-mint"><div className="feature-index">02 / ПРОЗРАЧНОСТЬ</div><div className="mint-figure"><span>1</span><span>2</span><span>3</span></div><strong>Каждый шаг<br/>на виду.</strong></Card>
@@ -175,15 +173,16 @@ function Survey() {
   }
   return <section className="survey-section" id="survey" aria-labelledby="survey-title">
     <div className="survey-intro"><span className="kicker">ПРОВЕРКА ГИПОТЕЗЫ</span><h2 id="survey-title">Как сейчас проходят согласования?</h2><p>Четыре вопроса о вашем опыте. Мы не просим имя, контакты или сведения о конкретной организации.</p><div className="survey-example"><strong>Демонстрационная анкета</strong><span>Ответы сохраняются в SQLite как данные демо. Они не включаются в отчёт CustDev без проверки выборки.</span></div></div>
-    <form className="survey-form" onSubmit={submit}>
+    <Card className="survey-card"><form className="survey-form" onSubmit={submit}>
       {sent ? <div className="survey-success" role="status"><CheckCheck size={30}/><h3>Ответ сохранён</h3><p>Спасибо. Результаты этой открытой демо-формы пока не считаются исследованием пользователей.</p></div> : <>
-        <label>Ваша роль в согласованиях<select required value={role} onChange={e => setRole(e.target.value)}><option value="">Выберите вариант</option><option value="initiator">Подаю заявки</option><option value="approver">Согласую заявки</option><option value="both">И подаю, и согласую</option><option value="other">Другая роль</option></select></label>
-        <label>Как часто вы участвуете в согласованиях?<select required value={frequency} onChange={e => setFrequency(e.target.value)}><option value="">Выберите вариант</option><option value="daily">Почти каждый день</option><option value="weekly">Каждую неделю</option><option value="monthly">Примерно раз в месяц</option><option value="rarely">Реже</option></select></label>
-        <label>Где чаще всего узнаёте статус?<select required value={channel} onChange={e => setChannel(e.target.value)}><option value="">Выберите вариант</option><option value="email">Почта</option><option value="messenger">Чат или звонок</option><option value="paper">Бумажный документ</option><option value="system">Внутренняя система</option><option value="other">Другой способ</option></select></label>
-        <fieldset><legend>Насколько понятен текущий статус заявки?</legend><div className="survey-scale" role="radiogroup" aria-label="Понятность статуса от 1 до 5">{[1,2,3,4,5].map(n => <label key={n}><input type="radio" name="visibility" value={n} checked={visibility === n} onChange={() => setVisibility(n)}/><span>{n}</span></label>)}</div><div className="survey-scale-hints"><span>Совсем не понятен</span><span>Полностью понятен</span></div></fieldset>
+        <div className="survey-form-heading"><span className="kicker">АНКЕТА / 01—04</span><strong>Ваш опыт</strong></div>
+        <div className="survey-field"><Label htmlFor="survey-role">Ваша роль в согласованиях</Label><Select value={role} onValueChange={setRole} required><SelectTrigger id="survey-role" className="survey-select"><SelectValue placeholder="Выберите вариант"/></SelectTrigger><SelectContent position="popper"><SelectItem value="initiator">Подаю заявки</SelectItem><SelectItem value="approver">Согласую заявки</SelectItem><SelectItem value="both">И подаю, и согласую</SelectItem><SelectItem value="other">Другая роль</SelectItem></SelectContent></Select></div>
+        <div className="survey-field"><Label htmlFor="survey-frequency">Как часто вы участвуете в согласованиях?</Label><Select value={frequency} onValueChange={setFrequency} required><SelectTrigger id="survey-frequency" className="survey-select"><SelectValue placeholder="Выберите вариант"/></SelectTrigger><SelectContent position="popper"><SelectItem value="daily">Почти каждый день</SelectItem><SelectItem value="weekly">Каждую неделю</SelectItem><SelectItem value="monthly">Примерно раз в месяц</SelectItem><SelectItem value="rarely">Реже</SelectItem></SelectContent></Select></div>
+        <div className="survey-field"><Label htmlFor="survey-channel">Где чаще всего узнаёте статус?</Label><Select value={channel} onValueChange={setChannel} required><SelectTrigger id="survey-channel" className="survey-select"><SelectValue placeholder="Выберите вариант"/></SelectTrigger><SelectContent position="popper"><SelectItem value="email">Почта</SelectItem><SelectItem value="messenger">Чат или звонок</SelectItem><SelectItem value="paper">Бумажный документ</SelectItem><SelectItem value="system">Внутренняя система</SelectItem><SelectItem value="other">Другой способ</SelectItem></SelectContent></Select></div>
+        <fieldset><legend>Насколько понятен текущий статус заявки?</legend><RadioGroup className="survey-scale" aria-label="Понятность статуса от 1 до 5" value={visibility ? String(visibility) : undefined} onValueChange={v => setVisibility(Number(v))}>{[1,2,3,4,5].map(n => <div key={n} className="survey-scale-option"><RadioGroupItem id={`visibility-${n}`} value={String(n)} className="survey-scale-control"/><Label htmlFor={`visibility-${n}`}>{n}</Label></div>)}</RadioGroup><div className="survey-scale-hints"><span>Совсем не понятен</span><span>Полностью понятен</span></div></fieldset>
         {error && <p className="survey-error" role="alert">{error}</p>}<Button disabled={busy} className="survey-submit">{busy ? 'Сохраняем…' : <>Отправить ответ <ArrowRight size={17}/></>}</Button>
       </>}
-    </form>
+    </form></Card>
   </section>
 }
 
