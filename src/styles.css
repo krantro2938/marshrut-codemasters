@@ -169,11 +169,11 @@ h1,h2,h3 { letter-spacing: -.055em; }
 .form-field [data-slot=label] { font-size: 11px; font-weight: 700; }
 .form-field input, .form-field textarea { border-radius: 9px; font-size: 12px; box-shadow: none; }
 .access-card .form-field input { height: 44px; }
-.choice-trigger { width: 100%; height: 44px; justify-content: space-between; padding: 0 12px; border-radius: 9px; color: #252726; background: #fff; font-size: 12px; font-weight: 400; box-shadow: none; }
+.choice-trigger { width: 100%; height: 52px; justify-content: space-between; padding: 0 18px; border-radius: 9px; color: #252726; background: #fff; font-size: 12px; font-weight: 400; box-shadow: none; }
 .choice-trigger>span { overflow: hidden; text-overflow: ellipsis; }
 .choice-trigger svg { color: #7d837e; }
-.choice-popover { width: var(--radix-popover-trigger-width); gap: 3px; padding: 5px; border: 1px solid #e4e7e2; border-radius: 12px; box-shadow: 0 16px 35px #1112; }
-.choice-option { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 38px; gap: 8px; padding: 8px 10px; border-radius: 8px; color: #292c29; text-align: left; font-size: 12px; cursor: pointer; }
+.choice-popover { width: var(--radix-select-trigger-width); gap: 3px; padding: 8px; border: 1px solid #e4e7e2; border-radius: 12px; box-shadow: 0 16px 35px #1112; }
+.choice-option { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 48px; gap: 8px; padding: 12px 42px 12px 16px; border-radius: 8px; color: #292c29; text-align: left; font-size: 12px; cursor: pointer; }
 .choice-option:hover, .choice-option:focus-visible { background: #f0f2fa; outline: none; }
 .choice-option[aria-checked=true] { color: #354fd2; font-weight: 650; }
 .demo-password { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 19px; padding: 12px 13px; border: 1px solid #e1e5f6; border-radius: 11px; background: #f4f6ff; }
@@ -508,7 +508,7 @@ h1,h2,h3 { font-family: "Unbounded Variable", sans-serif; letter-spacing: -.055e
 .survey-form-heading strong { font-family: "Unbounded Variable", sans-serif; font-size: 19px; font-weight: 550; }
 .survey-field { display: grid; gap: 10px; }
 .survey-field [data-slot=label], .survey-form legend { color: #243b58; font-size: 14px; font-weight: 700; }
-.survey-select { width: 100%; height: 49px; padding: 0 15px; border-color: #ccd7df; border-radius: 12px; background: #f8fafb; color: #203653; font-size: 14px; }
+.survey-select { width: 100%; height: 52px; padding: 0 18px; border-color: #ccd7df; border-radius: 12px; background: #f8fafb; color: #203653; font-size: 14px; }
 .survey-select:hover, .choice-trigger:hover { border-color: #879ed0; }
 .survey-form fieldset { margin-top: 2px; }
 .survey-form legend { margin-bottom: 14px; }
@@ -535,9 +535,9 @@ h1,h2,h3 { font-family: "Unbounded Variable", sans-serif; letter-spacing: -.055e
 .access-card [data-slot=card-header] p { color: #607087; font-size: 13px; }
 .form-field [data-slot=label] { color: #243b58; font-size: 13px; }
 .form-field input, .form-field textarea { min-height: 46px; border-color: #cdd8e0; border-radius: 11px; font-size: 14px; }
-.choice-trigger { height: 47px; border-color: #cdd8e0; border-radius: 11px; font-size: 14px; }
+.choice-trigger { height: 52px; border-color: #cdd8e0; border-radius: 11px; font-size: 14px; }
 .choice-popover { width: var(--radix-select-trigger-width); border-radius: 12px; }
-.choice-option { min-height: 42px; font-size: 13px; }
+.choice-option { min-height: 48px; font-size: 13px; }
 .demo-password { padding: 15px; border-color: #d6e1f3; border-radius: 13px; background: #f0f5fd; }
 .demo-password span { font-size: 10px; }
 .demo-password strong { font-size: 14px; }
@@ -815,3 +815,7 @@ h1,h2,h3 { font-family: "Unbounded Variable", sans-serif; letter-spacing: -.055e
   .landing-hero { padding-top: 52px; }
   .hero-artwork { margin-top: 4px; }
 }
+
+/* Comfortable spacing across the survey and workspace menus. */
+[data-slot=select-content] { width: var(--radix-select-trigger-width); box-sizing: border-box; padding: 8px; }
+.form-field input, .form-field textarea { padding: 12px 16px; }
